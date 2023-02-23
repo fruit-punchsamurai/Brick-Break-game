@@ -3,12 +3,13 @@
 #include <time.h>
 #include <graphics.h>
 #include <math.h>
+#include <sstream>
+#include <cstdio>
 #define WINDOW_LENGTH 800
 #define WINDOW_BREADTH 1500
 #define RIGHT_ARROW 77
 #define LEFT_ARROW 75
 #define PI 3.141592
-
 
 using namespace std;
 
@@ -33,8 +34,24 @@ int batRight;
 int batMid;
 obstacle **brick;
 int prevDirection = 3;
+int gameFinish = 0;
+int life = 30;
+
+/*Function Declaration*/
+void Rectangle (int point[], int color);
+void Circle (int center[], int color);
+void TranslateBall();
+void CheckCollision(int changeX, int changeY );
 void MakeBricks();
 void DrawBricks();
+void TranslateBat();
+void SetStartingState();
+void CheckGameFinish();
+void GameComplete();
+void Menu();
+void GameOver();
+void DisplayLife();
+
 
 void Rectangle(int point[], int color){
     setcolor(color);
@@ -43,16 +60,12 @@ void Rectangle(int point[], int color){
     floodfill(point[0]+1,point[1]+1,color);
 }
 
-void Circle(int center[],int color){
+void Circle(int center[], int color){
     setcolor(color);
     setfillstyle(SOLID_FILL,color);
     circle(center[0],center[1],radius);
     floodfill(center[0],center[1],color);
 }
-
-
-
-
 
 void SetStartingState() {
     int i,j;
@@ -65,13 +78,17 @@ void SetStartingState() {
     batMid = bat[0] + 80;
     ball[0] = WINDOW_BREADTH/2;
     ball[1] = WINDOW_LENGTH/2;
+
     for(i = 0; i < 6; i++){
         for(j = 0; j < 8; j++){
             brick[i][j].state = 1;
         }
     }
     MakeBricks();
+    DisplayLife();
 }
+
+
 
 void TranslateBat(int amount, int batDirection){
     int firstChange = 0;
@@ -102,6 +119,7 @@ void TranslateBat(int amount, int batDirection){
     Circle(ball,15);
     DrawBricks();
     rectangle(5,5,WINDOW_BREADTH-5,WINDOW_LENGTH-5);
+    DisplayLife();
 }
 
 
@@ -206,13 +224,13 @@ void CheckCollision(int changeX = 0,int changeY = 0){
         if((ball[1]+radius)>WINDOW_LENGTH){
             ball[1] -= changeY;
             direction = 3;
+            life--;
         }
         if(((ball[1]+radius)>(bat[1]))&&(((ball[0]+radius)>=bat[0])&&((ball[0]-radius)<=bat[2]))){
             ball[1] -=changeY;
             if((ball[0]+radius>=bat[0])&&(ball[0]-radius<=batLeft)){
                 angle = PI/2 - angle;
                 direction = 3;
-                cout<<"here";
             }
             else if(ball[0]+radius>=batRight && ball[0]-radius<=bat[2]){
                 angle = PI/2 - angle;
@@ -260,6 +278,7 @@ void CheckCollision(int changeX = 0,int changeY = 0){
         if((ball[1]+radius)>WINDOW_LENGTH){
             ball[1] -= changeY;
             direction = 4;
+            life--;
 
         }
         if(( (ball[1]+radius)>(bat[1]))&&(((ball[0]+radius)>=bat[0])&&((ball[0]-radius)<=bat[2]))){
@@ -390,6 +409,7 @@ void TranslateBall(int speed,int radius){
     Circle(ball,15);
     DrawBricks();
     rectangle(5,5,WINDOW_BREADTH-5,WINDOW_LENGTH-5);
+    DisplayLife();
 }
 
 void MakeBricks(){
@@ -451,6 +471,7 @@ void MakeBricks(){
         d = b + 20;
     }
 }
+
 void DrawBricks(){
     int i, j;
     for(i = 0; i < 6; i++){
@@ -471,6 +492,55 @@ void DrawBricks(){
     }
 }
 
+void CheckGameFinish(){
+    int i, j;
+    gameFinish = 1;
+    for(i = 0; i < 6; i++){
+        for(j = 0; j < 8; j++){
+            if(brick[i][j].state<0){
+                brick[i][j].state = 0;
+            }
+            if(brick[i][j].state != 0){
+
+                gameFinish = 0;
+                break;
+            }
+        }
+        if(gameFinish == 0){
+            break;
+        }
+    }
+}
+
+void GameComplete(){
+    cleardevice();
+    settextstyle(DEFAULT_FONT, HORIZ_DIR, 4);
+    setcolor(15);
+    outtextxy(WINDOW_BREADTH/2-400,WINDOW_LENGTH/2,"Game Complete!!! You Won");
+    setvisualpage(page);
+    getch();
+    exit(0);
+}
+
+void Menu(){
+}
+
+void GameOver(){
+    cleardevice();
+    settextstyle(DEFAULT_FONT, HORIZ_DIR, 4);
+    setcolor(15);
+    outtextxy(WINDOW_BREADTH/2-400,WINDOW_LENGTH/2,"Game Over!!! You lost");
+    setvisualpage(page);
+    getch();
+    exit(0);
+}
+
+void DisplayLife(){
+    char lifeStr[20];
+    sprintf(lifeStr,"Life : %d",life);
+    setcolor(15);
+    outtextxy(WINDOW_BREADTH-60,WINDOW_LENGTH-30,lifeStr);
+}
 
 int main(){
     brick = new obstacle *[6];
@@ -482,6 +552,8 @@ int main(){
     ub = 80;
     lb = 20;
     srand(time(NULL));
+    int j;
+
 
 //    do{
 //        direction = rand()% (ub - lb + 1) + lb;
@@ -492,9 +564,17 @@ int main(){
     angle *= PI/180;
     direction = rand()%(6-5+1)+5;
     direction = 4;
-    SetStartingState();
-
     initwindow(WINDOW_BREADTH,WINDOW_LENGTH);
+
+    SetStartingState();
+    for(i = 0; i<6; i++){
+        for(j = 0; j<8; j++){
+            brick[i][j].state = 1;
+        }
+    }
+//    for(i = 0; i<8; i++){
+//        brick[0][i].state = 1;
+//    }
     rectangle(5,5,WINDOW_BREADTH-5,WINDOW_LENGTH-5);
     setactivepage(page);
 
@@ -504,6 +584,7 @@ int main(){
     DrawBricks();
     setvisualpage(page);
     getch();
+    //GameComplete();
     do{
         page==1?page--:page++;
         setactivepage(page);
@@ -513,12 +594,12 @@ int main(){
             switch(int(keypress)){
             case LEFT_ARROW:
                 //translate right;
-                TranslateBat(25,0);
+                TranslateBat(40,0);
                 break;
             case RIGHT_ARROW:
 
                 //translate left;
-                TranslateBat(25,1);
+                TranslateBat(40,1);
                 break;
             default:
                 //do nothing;
@@ -527,6 +608,17 @@ int main(){
         }
         setvisualpage(page);
         delay(2);
+        CheckGameFinish();
+        if (gameFinish == 1){
+            page==1?page--:page++;
+            setactivepage(page);
+            GameComplete();
+        }
+        if(life == 0){
+            page==1?page--:page++;
+            setactivepage(page);
+            GameOver();
+        }
     }while(keypress!='q');
 
     closegraph();
