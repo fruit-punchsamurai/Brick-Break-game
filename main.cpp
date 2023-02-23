@@ -18,6 +18,7 @@ int direction = 0;
 int page = 0;
 int radius = 10;
 
+
 void Rectangle(int point[], int color){
     setcolor(color);
     setfillstyle(SOLID_FILL,color);
@@ -68,12 +69,12 @@ void TranslateBat(int amount, int direction){
 }
 
 
-void CheckCollision(){
+void CheckCollision(int change){
     switch(direction){
     case 1:
         //up
         if((ball[1]-radius)<0){
-            ball[1] += amount;
+            ball[1] += change;
             direction = 2;
         }
         break;
@@ -81,65 +82,65 @@ void CheckCollision(){
 
         //down
         if((ball[1]+radius)>WINDOW_LENGTH){
-            ball[1] -= amount;
+            ball[1] -= change;
             direction = 1;
         }
         break;
     case 3:
         //top left
         if((ball[0]-radius)<0){
-            ball[0] += ONE_BY_ROOT_TWO * amount;
+            ball[0] += change;
             direction = 4;
         }
         if((ball[1]-radius)<0){
-            ball[1] += ONE_BY_ROOT_TWO * amount;
+            ball[1] += change;
             direction = 5;
         }
         break;
     case 4:
         //top right
         if((ball[0]+radius)>WINDOW_BREADTH){
-            ball[0] -= ONE_BY_ROOT_TWO * amount;
+            ball[0] -= change;
             direction = 3;
         }
         if((ball[1]-radius)<0){
-            ball[1] += ONE_BY_ROOT_TWO * amount;
+            ball[1] += change;
             direction = 6;
         }
         break;
     case 5:
         //bottom left
         if((ball[0]-radius)<0){
-            ball[0] += ONE_BY_ROOT_TWO * amount;
+            ball[0] += change;
             direction = 6;
         }
         if((ball[1]+radius)>WINDOW_LENGTH){
-            ball[1] -= ONE_BY_ROOT_TWO * amount;
+            ball[1] -= change;
             direction = 3;
         }
         break;
     case 6:
         //bottom right
         if((ball[0]+radius)>WINDOW_BREADTH){
-            ball[0] -= ONE_BY_ROOT_TWO * amount;
+            ball[0] -= change;
             direction = 5;
         }
         if((ball[1]+radius)>WINDOW_LENGTH){
-            ball[1] -= ONE_BY_ROOT_TWO * amount;
+            ball[1] -= change;
             direction = 4;
         }
         break;
     case 7:
         //left
         if((ball[0]-radius)<0){
-            ball[0] += amount;
+            ball[0] += change;
             direction = 8;
         }
         break;
     case 8:
         //right
         if((ball[0]+radius)>WINDOW_BREADTH){
-            ball[0] -= amount;
+            ball[0] -= change;
             direction = 7;
         }
         break;
@@ -158,61 +159,61 @@ void TranslateBall(int speed,int radius){
     case 1:
         //up
         ball[1] -= amount;
-        CheckCollision();
+        CheckCollision(amount);
 
 
         break;
     case 2:
         //down
         ball[1] += amount;
-        CheckCollision();
+        CheckCollision(amount);
 
         break;
     case 3:
         //top left
         ball[0] -= ONE_BY_ROOT_TWO * amount;
         ball[1] -= ONE_BY_ROOT_TWO * amount;
-        CheckCollision();
+        CheckCollision(ONE_BY_ROOT_TWO * amount);
 
         break;
     case 4:
         //top right
         ball[0] += ONE_BY_ROOT_TWO * amount;
         ball[1] -= ONE_BY_ROOT_TWO * amount;
-        CheckCollision();
+        CheckCollision(ONE_BY_ROOT_TWO * amount);
 
         break;
     case 5:
         //bottom left
         ball[0] -= ONE_BY_ROOT_TWO * amount;
         ball[1] += ONE_BY_ROOT_TWO * amount;
-        CheckCollision();
+        CheckCollision(ONE_BY_ROOT_TWO * amount);
 
         break;
     case 6:
         //bottom right
         ball[0] += ONE_BY_ROOT_TWO * amount;
         ball[1] += ONE_BY_ROOT_TWO * amount;
-        CheckCollision();
+        CheckCollision(ONE_BY_ROOT_TWO * amount);
 
         break;
     case 7:
         //left
         ball[0] -= amount;
-        CheckCollision();
+        CheckCollision(amount);
 
         break;
     case 8:
         //right
         ball[0] += amount;
-        CheckCollision();
+        CheckCollision(amount);
 
         break;
         default:
             break;
     }
     Rectangle(bat,15);
-    Circle(ball,10,15);
+    Circle(ball,15);
 }
 
 int main(){
