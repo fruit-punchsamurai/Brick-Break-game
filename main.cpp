@@ -9,7 +9,11 @@
 #define WINDOW_BREADTH 1500
 #define RIGHT_ARROW 77
 #define LEFT_ARROW 75
+#define UP_ARROW 72
+#define DOWN_ARROW 80
+#define ENTER 13
 #define PI 3.141592
+
 
 using namespace std;
 
@@ -35,7 +39,8 @@ int batMid;
 obstacle **brick;
 int prevDirection = 3;
 int gameFinish = 0;
-int life = 30;
+int life = 3;
+int menuState = 1;
 
 /*Function Declaration*/
 void Rectangle (int point[], int color);
@@ -51,6 +56,7 @@ void GameComplete();
 void Menu();
 void GameOver();
 void DisplayLife();
+void DisplayHelp();
 
 
 void Rectangle(int point[], int color){
@@ -343,8 +349,6 @@ void CheckCollision(int changeX = 0,int changeY = 0){
 
 }
 
-
-
 void TranslateBall(int speed,int radius){
     cleardevice();
     int amount = 8 * speed;
@@ -523,6 +527,84 @@ void GameComplete(){
 }
 
 void Menu(){
+    char keypress;
+    while(1){
+    page==1?page--:page++;
+    setactivepage(page);
+    cleardevice();
+    settextstyle(DEFAULT_FONT, HORIZ_DIR, 6);
+    setcolor(15);
+
+    if(menuState == 1){
+        setcolor(14);
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2-80,">Play<");
+        setcolor(15);
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2+60-80," Help");
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2+60+60-80," Exit");
+        setvisualpage(page);
+        keypress = getch();
+        switch(int(keypress)){
+            case UP_ARROW:
+                menuState = 3;
+                break;
+            case DOWN_ARROW:
+                menuState = 2;
+                break;
+            case ENTER:
+                cleardevice();
+                settextstyle(3, HORIZ_DIR, 1);
+                return;
+            default:
+                break;
+        }
+    }
+    else if(menuState == 2){
+        setcolor(15);
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2-80," Play");
+        setcolor(14);
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2+60-80,">Help<");
+        setcolor(15);
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2+60+60-80," Exit");
+        setvisualpage(page);
+        keypress = getch();
+        switch(int(keypress)){
+            case UP_ARROW:
+                menuState = 1;
+                break;
+            case DOWN_ARROW:
+                menuState = 3;
+                break;
+            case ENTER:
+                cleardevice();
+                DisplayHelp();
+                break;
+            default:
+                break;
+        }
+    }
+    else{
+        setcolor(15);
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2-80," Play");
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2+60-80," Help");
+        setcolor(14);
+        outtextxy(WINDOW_BREADTH/2-100,WINDOW_LENGTH/2+60+60-80,">Exit<");
+        setvisualpage(page);
+        keypress = getch();
+        switch(int(keypress)){
+            case UP_ARROW:
+                menuState = 2;
+                break;
+            case DOWN_ARROW:
+                menuState = 1;
+                break;
+            case ENTER:
+                exit(0);
+            default:
+                break;
+        }
+    }
+    setcolor(15);
+    }
 }
 
 void GameOver(){
@@ -542,6 +624,24 @@ void DisplayLife(){
     outtextxy(WINDOW_BREADTH-60,WINDOW_LENGTH-30,lifeStr);
 }
 
+void DisplayHelp(){
+    page==1?page--:page++;
+    setactivepage(page);
+    cleardevice();
+    settextstyle(DEFAULT_FONT, HORIZ_DIR, 4);
+    outtextxy(80, 50,"Use arrow keys to move");
+    outtextxy(80, 50+60, "Your lives is displayed at bottom left, ");
+    outtextxy(80, 50+60+60, "You lose a life if the ball touch the ground, ");
+    outtextxy(80, 50+60+60+60, "When it reaches 0 you lose");
+    outtextxy(80, 50+60+60+60+60, "Destroy all bricks to win the game");
+    outtextxy(80, 50+60+60+60+60+60, "Red bricks have 6 hp, ");
+    outtextxy(80, 50+60+60+60+60+60+60, "Blue brick have 4 hp, ");
+    outtextxy(80, 50+60+60+60+60+60+60+60, "White bricks have 1 hp");
+    outtextxy(80, 50+60+60+60+60+60+60+60+60, "Press any key to return to Main Menu");
+    setvisualpage(page);
+    getch();
+    cleardevice();
+}
 int main(){
     brick = new obstacle *[6];
     for(k = 0; k<6; k++){
@@ -566,19 +666,21 @@ int main(){
     direction = 4;
     initwindow(WINDOW_BREADTH,WINDOW_LENGTH);
 
+    Menu();
+    page==1?page--:page++;
+    setactivepage(page);
+    cleardevice();
     SetStartingState();
-    for(i = 0; i<6; i++){
-        for(j = 0; j<8; j++){
-            brick[i][j].state = 1;
-        }
-    }
+//    for(i = 0; i<6; i++){
+//        for(j = 0; j<8; j++){
+//            brick[i][j].state = 1;
+//        }
+//    }
 //    for(i = 0; i<8; i++){
 //        brick[0][i].state = 1;
 //    }
     rectangle(5,5,WINDOW_BREADTH-5,WINDOW_LENGTH-5);
     setactivepage(page);
-
-
     Rectangle(bat,15);
     Circle(ball,15);
     DrawBricks();
