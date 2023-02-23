@@ -660,10 +660,8 @@ int main(){
 //        cout<<direction<<endl;
 //    }while((direction!=5) && (direction !=6));
     angle = rand()% (ub - lb + 1) + lb;
-    angle = 30;
     angle *= PI/180;
     direction = rand()%(6-5+1)+5;
-    direction = 4;
     initwindow(WINDOW_BREADTH,WINDOW_LENGTH);
 
     Menu();
