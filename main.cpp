@@ -118,6 +118,10 @@ void CheckCollision(int change){
             ball[1] -= change;
             direction = 3;
         }
+        if(((ball[1]+radius)>(bat[1]))&&(((ball[0]+radius)>=bat[0])&&((ball[0]-radius)<=bat[2]))){
+            ball[1] -=change;
+            direction = 3;
+        }
         break;
     case 6:
         //bottom right
@@ -127,6 +131,10 @@ void CheckCollision(int change){
         }
         if((ball[1]+radius)>WINDOW_LENGTH){
             ball[1] -= change;
+            direction = 4;
+        }
+        if(((ball[1]+radius)>(bat[1]))&&(((ball[0]+radius)>=bat[0])&&((ball[0]-radius)<=bat[2]))){
+            ball[1] -=change;
             direction = 4;
         }
         break;
@@ -216,6 +224,10 @@ void TranslateBall(int speed,int radius){
     Circle(ball,15);
 }
 
+void MakeBricks(){
+
+}
+
 int main(){
     int i;
     char keypress;
@@ -234,6 +246,7 @@ int main(){
     Rectangle(bat,15);
     Circle(ball,15);
     setvisualpage(page);
+    MakeBricks();
     do{
         page==1?page--:page++;
         setactivepage(page);
