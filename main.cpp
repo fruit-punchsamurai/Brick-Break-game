@@ -17,6 +17,9 @@ using namespace std;
 struct obstacle{
     int arr[4];
     int state;
+    int left;
+    int right;
+    int mid;
 };
 typedef obstacle obstacle;
 int bat[4];
@@ -26,8 +29,11 @@ int page = 0;
 int radius = 10;
 float angle = 0.0;
 int k;
+int batLeft;
+int batRight;
+int batMid;
 obstacle **brick;
-
+int prevDirection = 3;
 void MakeBricks();
 void DrawBricks();
 
@@ -55,6 +61,9 @@ void SetStartingState() {
     bat[1] = (WINDOW_LENGTH)-30;
     bat[2] = (WINDOW_BREADTH/2)+80;
     bat[3] = (WINDOW_LENGTH)-10;
+    batLeft = bat[0] + 40;
+    batRight = bat[2] -40;
+    batMid = bat[0] + 80;
     ball[0] = WINDOW_BREADTH/2;
     ball[1] = WINDOW_LENGTH/2;
     for(i = 0; i < 6; i++){
@@ -65,28 +74,35 @@ void SetStartingState() {
     MakeBricks();
 }
 
-void TranslateBat(int amount, int BatDirection){
+void TranslateBat(int amount, int batDirection){
+    int firstChange = 0;
     cleardevice();
-    if(BatDirection == 0){
-        bat[0] -= amount;
-        bat[2] -= amount;
+    prevDirection == batDirection ? firstChange = 0 : firstChange = 40;
+    if(batDirection == 0){
+        bat[0] -= amount + firstChange;
+        bat[2] -= amount + firstChange;
+        prevDirection = 0;
     }
     else{
-        bat[0] += amount;
-        bat[2] += amount;
+        bat[0] += amount + firstChange;
+        bat[2] += amount + firstChange;
+        prevDirection = 1;
     }
     if(bat[0]<5){
-        bat[0] += amount;
+        bat[0] += amount ;
         bat[2] += amount;
     }
     if(bat[2]>WINDOW_BREADTH){
         bat[0] -= amount;
         bat[2] -= amount;
     }
+    batLeft = bat[0] + 40;
+    batRight = bat[2] -40;
+    batMid = bat[0] + 80;
     Rectangle(bat,15);
     Circle(ball,15);
     DrawBricks();
-    //rectangle(0,0,WINDOW_BREADTH,WINDOW_LENGTH);
+    rectangle(5,5,WINDOW_BREADTH-5,WINDOW_LENGTH-5);
 }
 
 
@@ -122,12 +138,22 @@ void CheckCollision(int changeX = 0,int changeY = 0){
             for(j = 0; j < 8; j++){
                 if(brick[i][j].state == 1){
                 if((((ball[1]+radius)>(brick[i][j].arr[1]))&&((ball[1]-radius)<(brick[i][j].arr[3])))&&(((ball[0]+radius)>=brick[i][j].arr[0])&&((ball[0]-radius)<=brick[i][j].arr[2]))){
-                    ball[1] -=changeY;
-                    direction = 5;
+                    ball[1] +=changeY;
                     brick[i][j].state = 0;
+                    if((ball[0]+radius>=brick[i][j].arr[0])&&(ball[0]-radius<=brick[i][j].left)){
+                        angle = PI/2 - angle;
+                        direction = 5;
+                    }
+                    else if(ball[0]+radius>=brick[i][j].right && ball[0]-radius<=brick[i][j].arr[2]){
+                        angle = PI/2 - angle;
+                        direction = 6;
+                    }
+                    else{
+                        direction = 5;
+                    }
                 }
                 if((((ball[0]+radius)>(brick[i][j].arr[0]))&&((ball[0]-radius)<(brick[i][j].arr[2])))&&(((ball[1]+radius)>=brick[i][j].arr[1])&&((ball[1]-radius)<=brick[i][j].arr[3]))){
-                    ball[1] -=changeY;
+                    ball[0] +=changeX;
                     direction = 4;
                     brick[i][j].state = 0;
                 }
@@ -149,12 +175,22 @@ void CheckCollision(int changeX = 0,int changeY = 0){
             for(j = 0; j < 8; j++){
                 if(brick[i][j].state == 1){
                 if((((ball[1]+radius)>(brick[i][j].arr[1]))&&((ball[1]-radius)<(brick[i][j].arr[3])))&&(((ball[0]+radius)>=brick[i][j].arr[0])&&((ball[0]-radius)<=brick[i][j].arr[2]))){
-                    ball[1] -=changeY;
-                    direction = 6;
+                    ball[1] +=changeY;
                     brick[i][j].state = 0;
+                    if((ball[0]+radius>=brick[i][j].arr[0])&&(ball[0]-radius<=brick[i][j].left)){
+                        angle = PI/2 - angle;
+                        direction = 5;
+                    }
+                    else if(ball[0]+radius>=brick[i][j].right && ball[0]-radius<=brick[i][j].arr[2]){
+                        angle = PI/2 - angle;
+                        direction = 6;
+                    }
+                    else{
+                        direction = 6;
+                    }
                 }
                 if((((ball[0]+radius)>(brick[i][j].arr[0]))&&((ball[0]-radius)<(brick[i][j].arr[2])))&&(((ball[1]+radius)>=brick[i][j].arr[1])&&((ball[1]-radius)<=brick[i][j].arr[3]))){
-                    ball[1] -=changeY;
+                    ball[0] -=changeX;
                     direction = 3;
                     brick[i][j].state = 0;
                 }
@@ -174,18 +210,39 @@ void CheckCollision(int changeX = 0,int changeY = 0){
         }
         if(((ball[1]+radius)>(bat[1]))&&(((ball[0]+radius)>=bat[0])&&((ball[0]-radius)<=bat[2]))){
             ball[1] -=changeY;
-            direction = 3;
+            if((ball[0]+radius>=bat[0])&&(ball[0]-radius<=batLeft)){
+                angle = PI/2 - angle;
+                direction = 3;
+                cout<<"here";
+            }
+            else if(ball[0]+radius>=batRight && ball[0]-radius<=bat[2]){
+                angle = PI/2 - angle;
+                direction = 4;
+            }
+            else{
+                direction = 3;
+            }
         }
         for(i = 0; i < 6; i++){
             for(j = 0; j < 8; j++){
                 if(brick[i][j].state == 1){
                 if((((ball[1]+radius)>(brick[i][j].arr[1]))&&((ball[1]-radius)<(brick[i][j].arr[3])))&&(((ball[0]+radius)>=brick[i][j].arr[0])&&((ball[0]-radius)<=brick[i][j].arr[2]))){
                     ball[1] -=changeY;
-                    direction = 3;
                     brick[i][j].state = 0;
+                    if((ball[0]+radius>=brick[i][j].arr[0])&&(ball[0]-radius<=brick[i][j].left)){
+                        angle = PI/2 - angle;
+                        direction = 3;
+                    }
+                    else if(ball[0]+radius>=brick[i][j].right && ball[0]-radius<=brick[i][j].arr[2]){
+                        angle = PI/2 - angle;
+                        direction = 4;
+                    }
+                    else{
+                        direction = 3;
+                    }
                 }
                 if((((ball[0]+radius)>(brick[i][j].arr[0]))&&((ball[0]-radius)<(brick[i][j].arr[2])))&&(((ball[1]+radius)>=brick[i][j].arr[1])&&((ball[1]-radius)<=brick[i][j].arr[3]))){
-                    ball[1] -=changeY;
+                    ball[0] +=changeX;
                     direction = 6;
                     brick[i][j].state = 0;
                 }
@@ -206,20 +263,41 @@ void CheckCollision(int changeX = 0,int changeY = 0){
             direction = 4;
 
         }
-        if((  (ball[1]+radius)>(bat[1]))&&(((ball[0]+radius)>=bat[0])&&((ball[0]-radius)<=bat[2]))){
+        if(( (ball[1]+radius)>(bat[1]))&&(((ball[0]+radius)>=bat[0])&&((ball[0]-radius)<=bat[2]))){
             ball[1] -=changeY;
-            direction = 4;
+            if((ball[0]+radius>=bat[0])&&(ball[0]-radius<=batLeft)){
+                angle = PI/2 - angle;
+                direction = 3;
+            }
+            else if(ball[0]+radius>=batRight && ball[0]-radius<=bat[2]){
+                angle = PI/2 - angle;
+                direction = 4;
+            }
+            else{
+                direction = 4;
+            }
+
         }
         for(i = 0; i < 6; i++){
             for(j = 0; j < 8; j++){
                 if(brick[i][j].state == 1){
                 if((((ball[1]+radius)>(brick[i][j].arr[1]))&&((ball[1]-radius)<(brick[i][j].arr[3])))&&(((ball[0]+radius)>=brick[i][j].arr[0])&&((ball[0]-radius)<=brick[i][j].arr[2]))){
-                    ball[1] -=changeY;
-                    direction = 4;
                     brick[i][j].state = 0;
+                    ball[1] -=changeY;
+                    if((ball[0]+radius>=brick[i][j].arr[0])&&(ball[0]-radius<=brick[i][j].left)){
+                        angle = PI/2 - angle;
+                        direction = 3;
+                    }
+                    else if(ball[0]+radius>=brick[i][j].right && ball[0]-radius<=brick[i][j].arr[2]){
+                        angle = PI/2 - angle;
+                        direction = 4;
+                    }
+                    else{
+                        direction = 4;
+                    }
                 }
                 if((((ball[0]+radius)>(brick[i][j].arr[0]))&&((ball[0]-radius)<(brick[i][j].arr[2])))&&(((ball[1]+radius)>=brick[i][j].arr[1])&&((ball[1]-radius)<=brick[i][j].arr[3]))){
-                    ball[1] -=changeY;
+                    ball[0] -=changeX;
                     direction = 5;
                     brick[i][j].state = 0;
                 }
@@ -312,7 +390,7 @@ void TranslateBall(int speed,int radius){
     Rectangle(bat,15);
     Circle(ball,15);
     DrawBricks();
-  //  rectangle(0,0,WINDOW_BREADTH,WINDOW_LENGTH);
+    rectangle(5,5,WINDOW_BREADTH-5,WINDOW_LENGTH-5);
 }
 
 void MakeBricks(){
@@ -333,7 +411,9 @@ void MakeBricks(){
             brick[i][j].arr[1] = b;
             brick[i][j].arr[2] = c;
             brick[i][j].arr[3] = d;
-
+            brick[i][j].left = a + 40;
+            brick[i][j].right = c - 40;
+            brick[i][j].mid = a + 80;
             a = c + 20;
             c = a + 160;
 
@@ -372,12 +452,14 @@ int main(){
 //        cout<<direction<<endl;
 //    }while((direction!=5) && (direction !=6));
     angle = rand()% (ub - lb + 1) + lb;
+    angle = 80;
     angle *= PI/180;
     direction = rand()%(6-5+1)+5;
+    direction = 6;
     SetStartingState();
 
     initwindow(WINDOW_BREADTH,WINDOW_LENGTH);
-    //rectangle(0,0,WINDOW_BREADTH,WINDOW_LENGTH);
+    rectangle(5,5,WINDOW_BREADTH-5,WINDOW_LENGTH-5);
     setactivepage(page);
 
 
@@ -385,26 +467,27 @@ int main(){
     Circle(ball,15);
     DrawBricks();
     setvisualpage(page);
+    getch();
     do{
         page==1?page--:page++;
         setactivepage(page);
         TranslateBall(1,radius);
         if(kbhit()){
-        keypress = getch();
-        switch(int(keypress)){
-        case LEFT_ARROW:
-            //translate right;
-            TranslateBat(25,0);
-            break;
-        case RIGHT_ARROW:
+            keypress = getch();
+            switch(int(keypress)){
+            case LEFT_ARROW:
+                //translate right;
+                TranslateBat(25,0);
+                break;
+            case RIGHT_ARROW:
 
-            //translate left;
-            TranslateBat(25,1);
-            break;
-        default:
-            //do nothing;
-            break;
-        }
+                //translate left;
+                TranslateBat(25,1);
+                break;
+            default:
+                //do nothing;
+                break;
+            }
         }
         setvisualpage(page);
         delay(2);
